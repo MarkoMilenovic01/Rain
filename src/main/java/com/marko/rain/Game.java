@@ -10,8 +10,9 @@ import java.awt.image.DataBufferInt;
 
 public class Game extends Canvas implements Runnable {
     public static int width = 300;
-    public static int height = width / 16*9;
+    public static int height = 168;
     public static int scale = 3;
+    public static String title = "Rain";
 
     private Thread thread;
     private JFrame frame;
@@ -48,14 +49,40 @@ public class Game extends Canvas implements Runnable {
 
     @Override
     public void run() {
+        long lastTime = System.nanoTime();
+        long timer = System.currentTimeMillis();
+        final double ns = 1.0e9/60.0;
+        double delta = 0;
+        int frames = 0;
+        int updates = 0;
+
         while (running) {
-            update();
+            long now = System.nanoTime();
+            delta+= (now-lastTime) / ns;
+            lastTime = now;
+
+            while (delta >= 1){
+                update();
+                updates++;
+                delta--;
+            }
             render();
+            frames++;
+
+            if(System.currentTimeMillis() - timer > 1000){
+                timer+= 1000;
+                frame.setTitle(title + "   |     " + updates + " ups," + frames + " fps");
+                updates = 0;
+                frames = 0;
+            }
         }
+        stop();
     }
 
+    int x = 0, y = 0;
     public void update(){
-
+        x++;
+        y++;
     }
 
     public void render(){
@@ -65,13 +92,10 @@ public class Game extends Canvas implements Runnable {
             return;
         }
 
-
         screen.clear();
-        screen.render();
+        screen.render(x, y);
 
-        for(int i = 0;i <pixels.length;i++){
-            pixels[i] = screen.pixels[i];
-        }
+        System.arraycopy(screen.pixels, 0, pixels, 0, pixels.length);
 
         Graphics g = bs.getDrawGraphics();
         g.drawImage(image, 0, 0, getWidth(), getHeight(),null);
@@ -82,7 +106,7 @@ public class Game extends Canvas implements Runnable {
         Game game = new Game();
 
         game.frame.setResizable(false);
-        game.frame.setTitle("Rain");
+        game.frame.setTitle(Game.title);
         game.frame.add(game);
         game.frame.pack();
         game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
