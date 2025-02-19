@@ -1,6 +1,7 @@
 package com.marko.rain;
 
 import com.marko.rain.graphics.Screen;
+import com.marko.rain.input.Keyboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +20,7 @@ public class Game extends Canvas implements Runnable {
     private boolean running = false;
 
     private Screen screen;
+    private Keyboard keyboard;
 
     private BufferedImage image = new BufferedImage(width, height,BufferedImage.TYPE_INT_RGB);
     private int[] pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
@@ -30,6 +32,9 @@ public class Game extends Canvas implements Runnable {
 
         screen = new Screen(width, height);
         frame = new JFrame();
+
+        keyboard = new Keyboard();
+        addKeyListener(keyboard);
     }
 
     public synchronized void start(){
@@ -55,6 +60,7 @@ public class Game extends Canvas implements Runnable {
         double delta = 0;
         int frames = 0;
         int updates = 0;
+        requestFocus();
 
         while (running) {
             long now = System.nanoTime();
@@ -81,8 +87,14 @@ public class Game extends Canvas implements Runnable {
 
     int x = 0, y = 0;
     public void update(){
-        x++;
-        y++;
+        keyboard.update();
+      if(keyboard.up) y--;
+      if(keyboard.down) y++;
+      if(keyboard.right) x++;
+      if(keyboard.left) x--;
+
+
+
     }
 
     public void render(){
